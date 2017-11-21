@@ -1,0 +1,130 @@
+{
+  "AWSTemplateFormatVersion":"2010-09-09",
+  "Resources":{
+"myDBSubnetGroup" : {
+         "Type" : "AWS::RDS::DBSubnetGroup",
+         "Properties" : {
+            "DBSubnetGroupDescription" : "description",
+            "SubnetIds" : ["subnet-4a992775", "subnet-ffe2869b"],
+            "Tags" : [ {"Key" : "String", "Value" : "String"} ]
+         }
+      },
+"lbsg" : {
+   "Type" : "AWS::EC2::SecurityGroup",
+   "Properties" : {
+      "GroupDescription" : "Allow http to client host",
+      "VpcId" : "vpc-0da93f75",
+      "SecurityGroupIngress" : [{
+            "IpProtocol" : "tcp",
+            "FromPort" : "80",
+            "ToPort" : "80",
+            "CidrIp" : "0.0.0.0/0"
+         }],
+      "SecurityGroupEgress" : [{
+         "IpProtocol" : "tcp",
+         "FromPort" : "0",
+         "ToPort" : "65535",
+         "CidrIp" : "0.0.0.0/0"
+      }]
+   }
+},     
+"dbsg" : {
+   "Type" : "AWS::EC2::SecurityGroup",
+   "Properties" : {
+      "GroupDescription" : "Allow http to client host",
+      "VpcId" : "vpc-0da93f75",
+      "SecurityGroupIngress" : [{
+            "IpProtocol" : "tcp",
+            "FromPort" : "3306",
+            "ToPort" : "3306",
+            "CidrIp" : "0.0.0.0/0"
+         }],
+      "SecurityGroupEgress" : [{
+         "IpProtocol" : "tcp",
+         "FromPort" : "0",
+         "ToPort" : "65535",
+         "CidrIp" : "0.0.0.0/0"
+      }]
+   }
+},    
+"MyDB" : {
+   "Type" : "AWS::RDS::DBInstance",
+   "Properties" : {
+      "DBName" : "userdb",
+      "AllocatedStorage" : "5",
+      "DBInstanceClass" : "db.t2.micro",
+      "DBSubnetGroupName": { "Ref": "myDBSubnetGroup" },
+      "Engine" : "MySQL",
+      "EngineVersion" : "5.5",
+      "MasterUsername" : "mysvcuser",
+      "MasterUserPassword" : "redhat12345",
+	  "VPCSecurityGroups": [ { "Ref": "dbsg" } ],
+      "Tags" : [ { "Key" : "Name", "Value" : "My SQL Database" } ]
+   }
+},         
+  "ElasticLoadBalancer" : {
+  "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
+  "Properties" : {
+    "Subnets" : ["subnet-4a992775", "subnet-ffe2869b"],
+	"SecurityGroups": [ { "Ref": "lbsg" } ],
+    "Listeners" : [ {
+      "LoadBalancerPort" : "80",
+      "InstancePort" : "9000",
+      "Protocol" : "HTTP"
+    } ],
+    "HealthCheck" : {
+      "Target" : {
+        "Fn::Join" : [ "", [ "HTTP:", "9000", "/" ] ]
+      },
+      "HealthyThreshold" : "3",
+      "UnhealthyThreshold" : "5",
+      "Interval" : "30",
+      "Timeout" : "5"
+    }
+	}
+	},
+"taskdefinition": {
+  "Type": "AWS::ECS::TaskDefinition",
+  "Properties" : {
+    "Family" : "threetierapp",
+    "ContainerDefinitions" : [
+    {
+      "Name": "frontend",
+      "Image":"mohanraz/frontend:latest",
+      "Cpu": "1",
+      "PortMappings":[
+        {
+          "ContainerPort": "80",
+          "HostPort": "9000"
+        }
+      ],
+      "Memory":"300",
+      "Essential": "true",
+      "Environment": [ { "Name": "MY_DB_HOST", "Value": { "Ref": "MyDB"} }, { "Name": "MY_DB_USER", "Value": "mysvcuser" }, { "Name": "MY_DB_PASS", "Value": "MY_DB_PASS" }, { "Name": "MY_DB_NAME", "Value": "userdb" } ]
+    },
+    {
+      "Name": "backend",
+      "Image": "mohanraz/backend:latest",
+      "Cpu": "1",
+      "Memory": "300",
+      "Essential" : "true",
+      "Environment": [ { "Name": "MY_DB_HOST", "Value": { "Ref": "MyDB"} }, { "Name": "MY_DB_USER", "Value": "mysvcuser" }, { "Name": "MY_DB_PASS", "Value": "MY_DB_PASS" }, { "Name": "MY_DB_NAME", "Value": "userdb" } ]
+    }]
+  }
+},
+
+"WebApp": {
+  "Type": "AWS::ECS::Service",
+  "Properties" : {
+    "Cluster": "testcluster",
+    "DesiredCount": 4,
+    "TaskDefinition" : { "Ref": "taskdefinition" },
+        "LoadBalancers" : [{
+      "LoadBalancerName" : { "Ref": "ElasticLoadBalancer" },
+      "ContainerPort" : "80",
+      "ContainerName" : "frontend"
+    }]
+  }
+}
+}
+}
