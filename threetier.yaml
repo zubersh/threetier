@@ -24,6 +24,15 @@ spec:
             requests:
               memory: "100Mi"
               cpu: "0.25"
+          env:
+            - name: "MY_DB_USER"
+              value: "mysvcuser"
+            - name: "MY_DB_PASS"
+              value: "redhat12345"
+            - name: "MY_DB_NAME"
+              value: "userdb"
+			      - name: "MY_DB_HOST"
+              value: "DATABASENAME"
 ---
 kind: Service
 apiVersion: v1
