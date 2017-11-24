@@ -31,7 +31,7 @@ spec:
               value: "redhat12345"
             - name: "MY_DB_NAME"
               value: "userdb"
-	    - name: "MY_DB_HOST"
+            - name: "MY_DB_HOST"
               value: "DATABASENAME"
 ---
 kind: Service
