@@ -1,0 +1,51 @@
+{
+  "AWSTemplateFormatVersion":"2010-09-09",
+  "Resources":{
+"myDBSubnetGroup" : {
+         "Type" : "AWS::RDS::DBSubnetGroup",
+         "Properties" : {
+            "DBSubnetGroupDescription" : "description",
+            "SubnetIds" : ["subnet-d66df19d", "subnet-44ad7e6b"],
+            "Tags" : [ {"Key" : "String", "Value" : "String"} ]
+         }
+      },
+"dbsg" : {
+   "Type" : "AWS::EC2::SecurityGroup",
+   "Properties" : {
+      "GroupDescription" : "Allow http to client host",
+      "VpcId" : "vpc-3df96045",
+      "SecurityGroupIngress" : [{
+            "IpProtocol" : "tcp",
+            "FromPort" : "3306",
+            "ToPort" : "3306",
+            "CidrIp" : "0.0.0.0/0"
+         }],
+      "SecurityGroupEgress" : [{
+         "IpProtocol" : "tcp",
+         "FromPort" : "0",
+         "ToPort" : "65535",
+         "CidrIp" : "0.0.0.0/0"
+      }]
+   }
+},
+"MyDB" : {
+   "Type" : "AWS::RDS::DBInstance",
+   "Properties" : {
+      "DBName" : "userdb",
+      "AllocatedStorage" : "5",
+      "DBInstanceClass" : "db.t2.micro",
+      "DBSubnetGroupName": { "Ref": "myDBSubnetGroup" },
+      "Engine" : "MySQL",
+      "EngineVersion" : "5.5",
+      "MasterUsername" : "mysvcuser",
+      "MasterUserPassword" : "redhat12345",
+          "VPCSecurityGroups": [ { "Ref": "dbsg" } ],
+      "Tags" : [ { "Key" : "Name", "Value" : "My SQL Database" } ]
+   }
+}
+},
+"Outputs":
+{
+  "dbname": {"Value":{"Fn::GetAtt": ["MyDB","Endpoint.Address"]}}
+}
+}
