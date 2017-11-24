@@ -1,0 +1,80 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        app: threetier
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - name: backend
+          image: "mohanraz/backend"
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            limits:
+              memory: "300Mi"
+              cpu: "0.5"
+            requests:
+              memory: "100Mi"
+              cpu: "0.25"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: backend
+spec:
+  selector:
+    app: threetier
+    tier: backend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: http
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: threetier
+    tier: frontend
+  ports:
+  - protocol: "TCP"
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        app: threetier
+        tier: frontend
+        track: stable
+    spec:
+      containers:
+      - name: frontend
+        image: "mohanraz/frontend"
+        ports:
+          - name: http
+            containerPort: 80
+        resources:
+          limits:
+             memory: "300Mi"
+             cpu: "0.5"
+          requests:
+            memory: "100Mi"
+            cpu: "0.25"
