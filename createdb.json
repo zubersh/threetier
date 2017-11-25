@@ -5,7 +5,7 @@
          "Type" : "AWS::RDS::DBSubnetGroup",
          "Properties" : {
             "DBSubnetGroupDescription" : "description",
-            "SubnetIds" : ["subnet-d66df19d", "subnet-44ad7e6b"],
+            "SubnetIds" : ["subnet-03e68567", "subnet-ce8f5de1"],
             "Tags" : [ {"Key" : "String", "Value" : "String"} ]
          }
       },
