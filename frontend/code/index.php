@@ -11,10 +11,11 @@ $response = curl_exec($conn);
 curl_close($conn);
 return $response;
 }
-$baseurl="http://backend/bootstrap.php";
+$backendlb = getenv("BACKENDLB");
+$baseurl="http://$backendlb/bootstrap.php";
 $response=httpPost($baseurl);
 echo $response;
-$testurl="http://backend/getusers.php";
+$testurl="http://$backendlb/getusers.php";
 $candllabassoc_id=httpPost($testurl);
 echo $candllabassoc_id;
 ?>
