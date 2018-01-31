@@ -5,7 +5,7 @@
       ec2_group:
         name: dbsg
         description: an example EC2 group
-        vpc_id: vpc-a4b8a1dc
+        vpc_id: vpc-ff36d284
         region: us-east-1
         rules:
           - proto: tcp
@@ -21,15 +21,15 @@
         name: dbsubnet
         description: My Fancy Ex Parrot Subnet Group
         subnets:
-          - subnet-5c91bc38
-          - subnet-168de74b
+          - subnet-a5073cee
+          - subnet-b67204eb
       register: dbsubnet
     - debug:
         var: dbsubnet
     - rds:
         command: create
         region: us-east-1
-        instance_name: new-database
+        instance_name: myapp-database
         db_engine: MySQL
         size: 10
         instance_type: db.m1.small
@@ -45,7 +45,7 @@
     - debug:
         var: mydb
     - replace:
-        path: ./fe.yaml
+        path: ./threetier.yaml
         regexp: 'DATABASENAME'
         replace: "{{ mydb.instance.endpoint }}"
         backup: yes
