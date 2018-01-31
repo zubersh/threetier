@@ -30,6 +30,7 @@
         command: create
         region: us-east-1
         instance_name: myapp-database
+        db_name: userdb
         db_engine: MySQL
         size: 10
         instance_type: db.m1.small
