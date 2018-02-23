@@ -5,7 +5,7 @@
       ec2_group:
         name: dbsg
         description: an example EC2 group
-        vpc_id: vpc-ff36d284
+        vpc_id: vpc-dc17c0a7
         region: us-east-1
         rules:
           - proto: tcp
@@ -21,8 +21,8 @@
         name: dbsubnet
         description: My Fancy Ex Parrot Subnet Group
         subnets:
-          - subnet-a5073cee
-          - subnet-b67204eb
+          - subnet-46ce991b
+          - subnet-4dd3e829
       register: dbsubnet
     - debug:
         var: dbsubnet
@@ -33,7 +33,7 @@
         db_name: userdb
         db_engine: MySQL
         size: 10
-        instance_type: db.m1.small
+        instance_type: db.t2.micro
         username: mysql_admin
         password: 1nsecure
         subnet: dbsubnet
